@@ -128,11 +128,11 @@ CONTAINS
         
         GAUSS = MATRIZAMPLIADA(A, B)
         DO J = 1, ORDEN
-            PRINT *, 'ANTES'
-            CALL MAT_MOSTRAR(GAUSS)
-            !CALL PIVOTEOMATAMP(GAUSS, J)
-            PRINT *, 'DESPUES'
-            CALL MAT_MOSTRAR(GAUSS)
+!            PRINT *, 'ANTES'
+!            CALL MAT_MOSTRAR(GAUSS)
+!            CALL PIVOTEOMATAMP(GAUSS, J)
+!            PRINT *, 'DESPUES'
+!            CALL MAT_MOSTRAR(GAUSS)
             DO FILA = J+1, ORDEN
                 GAUSS(FILA,J+1:) = GAUSS(FILA,J+1:) - GAUSS(J,J+1:)*GAUSS(FILA,J)/GAUSS(J,J)
                 GAUSS(FILA,J) = 0.
