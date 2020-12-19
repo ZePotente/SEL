@@ -1,4 +1,4 @@
-PROGRAM Ej1
+PROGRAM SEL
     !Modulos
     USE VYM_IO
     USE VYM_CALCULOS
