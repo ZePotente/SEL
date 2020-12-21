@@ -7,51 +7,50 @@ CONTAINS
     
     !Pivotea toda la matriz agarrando desde la diagonal para abajo.
     !Yendo de izquierda a derecha.
-    SUBROUTINE SUBRUT_PIVOTEOMATAMP(MAT)
+    SUBROUTINE SUBRUT_PIVOTEOMATAMP(MAT, B)
         REAL(8), DIMENSION(:,:), INTENT(INOUT) :: MAT
+        REAL(8), DIMENSION(:), OPTIONAL :: B
         !
-        INTEGER :: I, N
+        INTEGER :: J, N
         N = SIZE(MAT,1)
         
-        DO I = 1, N
-            CALL PIVOTEOMATAMP(MAT,I)
+        DO J = 1, N-1
+            IF (PRESENT(B)) THEN
+                CALL PIVOTEOMATAMP(MAT, J, B)
+            ELSE
+                CALL PIVOTEOMATAMP(MAT, J)
+            END IF
         END DO
     END SUBROUTINE
     
-    SUBROUTINE PIVOTEOMATAMP(MAT, J)
+    SUBROUTINE PIVOTEOMATAMP(MAT, J, B)
         REAL(8), DIMENSION(:,:), INTENT(INOUT) :: MAT
-        INTEGER, INTENT(IN) :: J
-        !
-        INTEGER :: DMAX
-        DMAX = DMAXIMO(MAT, J)
-        IF(DMAX /= J) THEN
-            CALL MAT_INTERFILAS(MAT, DMAX, J)
-            WRITE(*,*) 'Se intercambio la fila ', J, ' por la fila ', DMAX
-        END IF
-    END SUBROUTINE
-    
-    FUNCTION DMAXIMO(MAT, J)
-        INTEGER :: DMAXIMO
-        REAL(8), DIMENSION(:,:), INTENT(IN) :: MAT
+        REAL(8), DIMENSION(:), OPTIONAL :: B
         INTEGER, INTENT(IN) :: J
         !
         REAL(8) :: MAXIMO
-        REAL(8), ALLOCATABLE :: VAUX(:)
-        INTEGER :: I, N
-        
+        INTEGER :: I, INUEVO, N
         N = SIZE(MAT,1)
-        
-        ALLOCATE(VAUX(N))
-        VAUX = ABS(MAT(J:,J))
-        DMAXIMO = J; MAXIMO = ABS(MAT(J,J)) !la diagonal
-        DO I = J, N
-            IF (VAUX(I) > MAXIMO) THEN
-                MAXIMO = VAUX(I)
-                DMAXIMO = I
+        MAXIMO = 0.
+        INUEVO = J
+        DO I = J+1, N
+            IF (ABS(MAT(I,J))>MAXIMO) THEN
+                MAXIMO = ABS(MAT(I,J))
+                INUEVO = I
             END IF
-        END DO 
-        DEALLOCATE(VAUX)
-    END FUNCTION
+        END DO
+        
+        IF (INUEVO /= J) THEN
+!            PRINT *, 'INTERCAMBIO'
+!            PRINT *, 'ANTES:'
+!            CALL MAT_MOSTRAR(MAT, '(F8.4)')
+            CALL MAT_INTERFILAS(MAT, INUEVO, J)
+            IF (PRESENT(B)) CALL VEC_INTERELEM(B, INUEVO, J)
+!            WRITE(*,*) 'Se intercambio la fila ', J, ' por la fila ', INUEVO
+!            PRINT *, 'DESPUES:'
+!            CALL MAT_MOSTRAR(MAT, '(F8.4)')
+        END IF
+    END SUBROUTINE
     
     SUBROUTINE SUST_REGRESIVA(MATAMP, X)
         REAL(8), DIMENSION(:,:), INTENT(IN) :: MATAMP
@@ -128,11 +127,7 @@ CONTAINS
         
         GAUSS = MATRIZAMPLIADA(A, B)
         DO J = 1, ORDEN
-!            PRINT *, 'ANTES'
-!            CALL MAT_MOSTRAR(GAUSS)
-!            CALL PIVOTEOMATAMP(GAUSS, J)
-!            PRINT *, 'DESPUES'
-!            CALL MAT_MOSTRAR(GAUSS)
+            CALL PIVOTEOMATAMP(GAUSS, J)
             DO FILA = J+1, ORDEN
                 GAUSS(FILA,J+1:) = GAUSS(FILA,J+1:) - GAUSS(J,J+1:)*GAUSS(FILA,J)/GAUSS(J,J)
                 GAUSS(FILA,J) = 0.
@@ -153,7 +148,7 @@ CONTAINS
         GJ = MATRIZAMPLIADA(A, B)
         
         DO J = 1, ORDEN
-            !CALL PIVOTEOMATAMP(GJ, J)
+            CALL PIVOTEOMATAMP(GJ, J)
             DO FILA = 1, J-1
                 GJ(FILA,J+1:) = GJ(FILA,J+1:) - GJ(J,J+1:)*GJ(FILA,J)/GJ(J,J)
                 GJ(FILA,J) = 0.
@@ -165,8 +160,8 @@ CONTAINS
             END DO
             !poner 1 en la diagonal, dividiendo toda la fila por el elemento de la diagonal.
             !equivalente a hacer sustitucion regresiva al final.
-                GJ(J,J+1:) = GJ(J,J+1:)/GJ(J,J)
-                GJ(J,J) = 1.
+            GJ(J,J+1:) = GJ(J,J+1:)/GJ(J,J)
+            GJ(J,J) = 1.
         END DO
     END SUBROUTINE
     
