@@ -3,7 +3,6 @@ PROGRAM SEL
     USE VYM_IO
     USE VYM_CALCULOS
     USE SEL_MET
-    USE Test_SEL
     
     IMPLICIT NONE
     
